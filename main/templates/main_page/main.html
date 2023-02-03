@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+<meta name="viewport" content="width=device-width, initial-scale=1">
+{% block header %}
+<h1>{% block title %}Chemical substructure search example{% endblock %}</h1>
+
+<style>
+
+.centre {
+  margin: auto;
+  padding: 10px;
+}
+
+tr {
+  text-align: center;
+}
+
+
+</style>
+
+<script type="text/javascript"
+	src="{{ url_for('static', filename='JSME_2017-02-26/jsme/jsme.nocache.js') }}"></script>
+
+<SCRIPT>
+
+
+
+function searchBySubstructure() {
+
+  var xhttp = new XMLHttpRequest();
+  xhttp.onreadystatechange = function() {
+    if (this.readyState === 4 && this.status === 200) {
+      //cell2.innerHTML = this.responseText;
+        var dat = JSON.parse(this.responseText);
+        for (let i = 0; i < dat.length; i++) {
+            var row = table.insertRow(-1);
+            var q = dat[i];
+            for (let j = 0; j < q.length; j++) {
+                var cell = row.insertCell(j);
+                if (j === 1) {
+                    cell.innerHTML = "<img src=\"smi2png/" + btoa(q[j]) + "\">"
+                }
+                else {
+                    cell.innerHTML = q[j];
+                }
+            }
+        }
+    }
+  };
+  var table = document.getElementById("mytable");
+  table.innerHTML = "";
+  xhttp.open("POST", "substruct", true);
+  xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+  xhttp.send(JSON.stringify({ "SMILES": document.JME.smiles()}));
+
+}
+
+</SCRIPT>
+
+
+{% endblock %}
+
+{% block content %}
+
+<body>
+
+
+        <p><b>Draw molecule for substructure search:</b></p>
+    <div class="center" code="JME.class" name="JME" archive="JME.jar" width=360 height=315>
+        <param name="options" value="nozoom">
+        <!-- Disabling zoom because the scaling messes up when we grab the svg to show in the table -->
+        You have to enable Java and JavaScript on your machine !</div>
+    <p>
+        <button onclick="searchBySubstructure()">Search</button>
+    </p>
+
+
+
+<table style="width:100%">
+<thead>
+    <tr><th>ID</th>
+    <th>structure</th>
+    <th>sample</th>
+    <th>hitcounts</th>
+    <th>zscore</th></tr>
+</thead>
+<tbody id="mytable">
+
+</tbody>
+</table>
+
+</body>
+
+{% endblock %}
